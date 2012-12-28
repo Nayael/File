@@ -7,10 +7,12 @@
  * 
  * Date: Fri Dec 28 2012 03:47:30 GMT+0200
  */
+namespace Nayael\Util;
+
 class File
 {
 	/**
-	 * Whether the file exists or not (similar to file_exists())
+	 * Whether the file exists or not (similar to \file_exists())
 	 * 
 	 * @var bool
 	 * @readonly
@@ -34,7 +36,7 @@ class File
 	private $stat = array();
 
 	/**
-	 * The permissions on the file (similar to fileperms($this->path))
+	 * The permissions on the file (similar to \fileperms($this->path))
 	 *
 	 * @var int
 	 * @readonly
@@ -61,7 +63,7 @@ class File
 	{
 		switch ($value) {
 			case 'exists':
-				return file_exists($this->path);
+				return \file_exists($this->path);
 				break;
 
 			case 'stat': case 'perms': case 'path': case 'owner': case 'ownerName':
@@ -80,13 +82,13 @@ class File
 	public function __construct($path)
 	{
 		$this->path = $path;
-		$this->exists = file_exists($this->path);
+		$this->exists = \file_exists($this->path);
 		if ($this->exists) {	// If the file exists, we set the necessary properties
-			$this->owner = fileowner($this->path);
-			if (function_exists('posix_getpwuid'))
-				$this->ownerName = posix_getpwuid($this->owner);
-			$this->perms = fileperms($this->path);
-			$this->stat = stat($this->path);
+			$this->owner = \fileowner($this->path);
+			if (\function_exists('posix_getpwuid'))
+				$this->ownerName = \posix_getpwuid($this->owner);
+			$this->perms = \fileperms($this->path);
+			$this->stat = \stat($this->path);
 		}
 	}
 
@@ -97,12 +99,12 @@ class File
 	 */
 	public function write($data, int $length=null)
 	{
-		$resource = fopen($this->path, 'a');
+		$resource = \fopen($this->path, 'a');
 		if (null===$length)
-			fwrite($resource, $data);
+			\fwrite($resource, $data);
 		else
-			fwrite($resource, $data, $length);
-		fclose($resource);
+			\fwrite($resource, $data, $length);
+		\fclose($resource);
 	}
 
 	/**
@@ -112,12 +114,12 @@ class File
 	 */
 	public function writeLine($data='', int $length=null)
 	{
-		$resource = fopen($this->path, 'a');
+		$resource = \fopen($this->path, 'a');
 		if (null===$length)
-			fwrite($resource, "\r\n".$data);
+			\fwrite($resource, PHP_EOL.$data);
 		else
-			fwrite($resource, "\r\n".$data, $length);
-		fclose($resource);
+			\fwrite($resource, PHP_EOL.$data, $length);
+		\fclose($resource);
 	}
 
 	/**
@@ -145,10 +147,10 @@ class File
 	public function touch(int $time=null, int $atime=null)
 	{
 		if (null===$time)
-			$time = time();
+			$time = \time();
 		if (null===$atime)
-			return touch($this->path, $time);
-		return touch($this->path, $time, $atime);
+			return \touch($this->path, $time);
+		return \touch($this->path, $time, $atime);
 	}
 
 	/**
@@ -158,10 +160,10 @@ class File
 	 */
 	public function unlink(resource $context=null)
 	{
-		if (is_readable($this->path)) {
+		if (\is_readable($this->path)) {
 			if (null===$context)
-				return unlink($this->path);
-			return unlink($this->path, $context);
+				return \unlink($this->path);
+			return \unlink($this->path, $context);
 		}
 		return false;
 	}
@@ -185,8 +187,8 @@ class File
 	public function copy($dest, resource $context=null)
 	{
 		if (null===$context)
-			return copy($this->path, $dest);
-		return copy($this->path, $dest, $context);
+			return \copy($this->path, $dest);
+		return \copy($this->path, $dest, $context);
 	}
 
 	/**
@@ -196,7 +198,7 @@ class File
 	 */
 	public function chmod(int $mode)
 	{
-		return chmod($this->path, $mode);
+		return \chmod($this->path, $mode);
 	}
 
 	/**
@@ -206,6 +208,6 @@ class File
 	 */
 	public function chown($user)
 	{
-		return chown($this->path, $user);
+		return \chown($this->path, $user);
 	}
 }
