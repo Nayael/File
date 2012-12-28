@@ -1,7 +1,12 @@
 <?php 
-/**
-* A File class to easily manipulate files in PHP
-*/
+/*!
+ * A File class to easily manipulate files in PHP
+ *
+ * by Nicolas Vannier
+ * http://www.nicolas-vannier.com
+ * 
+ * Date: Fri Dec 28 2012 03:47:30 GMT+0200
+ */
 class File
 {
 	/**
