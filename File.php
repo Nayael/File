@@ -1,29 +1,70 @@
 <?php 
-/*!
- * A File class to easily manipulate files in PHP
+/**
+ * A File library to easily manipulate files in PHP
  *
  * by Nicolas Vannier
  * http://www.nicolas-vannier.com
  * 
  * Date: Sat Dec 29 2012 18:12:55 GMT+0200
  */
-namespace Nayael\Util;
+namespace Nayael\File;
 
+/**
+ * Thrown when File returns an execption
+ *
+ * @author Nicolas Vannier
+ */
+class FileException extends \Exception {
+	/**
+	 * Throws a FileException
+	 * @param string	$path The path to the file that generated an Exception
+	 * @param int		$code The exception code
+	 * @param \Exception	$previous The previous exception used for the exception chaining.
+	 */
+	public function __construct($path, $code=0, \Exception $previous=null)
+	{
+		$message = "An error occurred with the file ".$path;
+		switch ($code) {
+			case 1:
+				$message = "The File class only handles files, not directories !";
+				break;
+			case 404:
+				$message = "The file \"".$path."\" doesn't exist.";
+				break;
+			case 405:
+				$message = "The file \"".$path."\" doesn't exist or is not readable.";
+				break;
+			case 405:
+				$message = "The file \"".$path."\" is not writeable.";
+				break;
+		}
+		parent::__construct($message, $code, $previous);
+	}
+}
+
+/**
+ * Represents the file to manipulate.
+ * Provides useful methods to easily handle file writing, reading, etc.
+ *
+ * @author Nicolas Vannier
+ */
 class File
 {	
 	/**
- 	 * The path to the file
-	 *
+ 	 * [READONLY] The path to the file
 	 * @var string
-	 * @readonly
 	 */
 	private $path = '';
 
-	public function __get($value='')
+	/**
+	 * Magic getter method
+	 * @param string	$property The property to return
+	 */
+	public function __get($property='')
 	{
-		switch ($value) {
+		switch ($property) {
 			case 'path':
-				return $this->$value;
+				return $this->$property;
 				break;
 			
 			default:
@@ -32,12 +73,62 @@ class File
 	}
 
 	/**
-	 * Creates a File instance, to easily manipulate a file
+	 * Creates a File instance, to manipulate a file
 	 * @param string	$path The path to the file
 	 */
 	public function __construct($path)
 	{
+		if (\is_dir($path))
+			throw new FileException($path, 1);
+			
 		$this->path = $path;
+	}
+
+	/**
+	 * Checks if the file exists.
+	 * Throws an error if not.
+	 */
+	private function checkExistence()
+	{
+		if (!$this->exists())
+			throw new FileException($this->path, 404);
+	}
+
+	/**
+	 * Checks if the file is readable.
+	 * Throws an error if not.
+	 */
+	private function checkReadable()
+	{
+		if (!\is_readable($this->path))
+			throw new FileException($this->path, 405);
+	}
+
+	/**
+	 * Checks if the file is writable.
+	 * Throws an error if not.
+	 */
+	private function checkWritable()
+	{
+		$this->checkExistence();
+		if (!\is_writable($this->path))
+			throw new FileException($this->path, 406);
+	}
+
+	/**
+	 * Reads the file and returns its content as a string
+	 * @param bool	$use_include_path The FILE_USE_INCLUDE_PATH can be used to trigger include path search.
+	 * @param \resource	$context A valid context resource created with stream_context_create(). If you don't need to use a custom context, you can skip this parameter by NULL.
+	 * @param int	$offset The offset where the reading starts on the original stream. Seeking (offset) is not supported with remote files. Attempting to seek on non-local files may work with small offsets, but this is unpredictable because it works on the buffered stream.
+	 * @param int	$maxlen Maximum length of data read.
+	 * @return string The file content
+	 */
+	public function read($use_include_path=false, \resource $context=null, $offset=-1, $maxlen=-1)
+	{
+		$this->checkReadable();
+		if ($maxlen!==-1)
+			return \file_get_contents($this->path, $use_include_path, $context, $offset, $maxlen);
+		return \file_get_contents($this->path, $use_include_path, $context, $offset);
 	}
 
 	/**
@@ -47,6 +138,7 @@ class File
 	 */
 	public function readLines($read_EOL=false)
 	{
+		$this->checkReadable();
 		$lines = \file($this->path);
 		if ($this->getEOL()=="\r" && count($lines)==1) {
 			$lines = \explode("\r", $lines[0]);
@@ -63,7 +155,7 @@ class File
 		}
 		if (!$read_EOL) {
 			foreach ($lines as &$line) {
-				$line = \preg_replace('/\\r|\\n/', '', $line);
+				$line = \trim($line, "\r\n");
 			}
 		}
 		return $lines;
@@ -71,6 +163,7 @@ class File
 
 	/**
 	 * Returns a line from the file by its position (starts at 0)
+	 * @param int	$index The line to be read
 	 * @return string
 	 */
 	public function readLine($index)
@@ -85,6 +178,7 @@ class File
 	 */
 	public function getEOL()
 	{
+		$this->checkReadable();
 		$EOL = "";
 		$resource = \fopen($this->path, 'r');
 		$line = \fgets($resource);
@@ -104,12 +198,12 @@ class File
 	 */
 	public function replaceEOL($EOL)
 	{
-		if (!$this->exists() || $EOL == $this->getEOL() || !in_array($EOL, array("\r", "\n", "\r\n")))
+		if (!$this->exists() || $EOL==$this->getEOL() || !in_array($EOL, array("\r", "\n", "\r\n")))
 			return;
 		$lines = $this->readLines(true);
 		$this->write('');
 		foreach ($lines as $index => $line) {
-			if (($line = \preg_replace('/\\r|\\n/', '', $line)) == $lines[$index])
+			if (($line = \trim($line, "\r\n"))==$lines[$index])
 				$this->append($line);
 			else
 				$this->append($line.$EOL);
@@ -124,6 +218,7 @@ class File
 	 */
 	public function write($data, $overwrite=true, $length=null)
 	{
+		$this->checkWritable();
 		$resource = \fopen($this->path, $overwrite ? 'w' : 'a');
 		if (null===$length)
 			\fwrite($resource, $data);
@@ -140,6 +235,7 @@ class File
 	 */
 	public function writeLine($data, $overwrite=true, $length=null)
 	{
+		$this->checkWritable();
 		$resource = \fopen($this->path, $overwrite ? 'w' : 'a');
 		if (null===$length)
 			\fwrite($resource, PHP_EOL.$data);
@@ -158,9 +254,9 @@ class File
 	public function writeLines(array $lines, $overwrite=true, $newline=true, $length=null)
 	{
 		foreach ($lines as $index => $line) {
-			if (!$newline && $index == 0)
+			if (!$newline && $index==0)
 				$this->write($line, $overwrite, $length);
-			elseif ($index == 0)
+			elseif ($index==0)
 				$this->writeLine($line, $overwrite, $length);
 			else
 				$this->appendLine($line, $length);
@@ -169,16 +265,19 @@ class File
 
 	/**
 	 * Writes data at the end of the file
-	 * Alias for write($data, false)
+	 * @param string	$data The string that is to be written.
+	 * @param int		$length If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.
+	 * @see File::write()
 	 */
 	public function append($data, $length=null)
 	{
 		$this->write($data, false, $length);
 	}
-
 	/**
 	 * Writes a carrage return at the end of the file, then the given data
-	 * Alias for writeLine($data, false)
+	 * @param string	$data The string that is to be written.
+	 * @param int		$length If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.
+	 * @see File::writeLine()
 	 */
 	public function appendLine($data='', $length=null)
 	{
@@ -187,11 +286,14 @@ class File
 
 	/**
 	 * Takes an array as a parameter, and writes each element in a line
-	 * Alias for writeLines($data, false)
+	 * @param array	$lines The lines to write in the file
+	 * @param bool	$newline Shall a newline be added before writing in the file ?
+	 * @param int 	$length If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.
+	 * @see File::writeLines()
 	 */
 	public function appendLines(array $lines, $newline=true, $length=null)
 	{
-		$this->writeLines($lines, false, $newline);
+		$this->writeLines($lines, false, $newline, $length);
 	}
 
 	/**
@@ -210,26 +312,34 @@ class File
 	}
 
 	/**
-	 * Deletes the file
-	 * @param resource	$context
-	 * @return bool
+	 * Creates the file if it doesn't exist
 	 */
-	public function unlink(resource $context=null)
+	public function create()
 	{
-		if (\is_readable($this->path)) {
-			if (null===$context)
-				return \unlink($this->path);
-			return \unlink($this->path, $context);
-		}
+		if (!$this->exists())
+			return $this->touch();
 		return false;
 	}
 
 	/**
-	 * Deletes the file
-	 * @param resource $context
+	 * Deletes the file name
+	 * @param \resource	$context
 	 * @return bool
 	 */
-	public function delete(resource $context=null)
+	public function unlink(\resource $context=null)
+	{
+		$this->checkReadable();
+		if (null===$context)
+			return \unlink($this->path);
+		return \unlink($this->path, $context);
+	}
+
+	/**
+	 * Deletes the file name
+	 * @param \resource	$context
+	 * @see File::unlink()
+	 */
+	public function delete(\resource $context=null)
 	{
 		return $this->unlink($context);
 	}
@@ -237,10 +347,10 @@ class File
 	/**
 	 * Copies the file
 	 * @param string	$dest The destination path. If dest is a URL, the copy operation may fail if the wrapper does not support overwriting of existing files.
-	 * @param resource	$context A valid context resource created with stream_context_create().
+	 * @param \resource	$context A valid context resource created with stream_context_create().
 	 * @return bool
 	 */
-	public function copy($dest, resource $context=null)
+	public function copy($dest, \resource $context=null)
 	{
 		if (null===$context)
 			return \copy($this->path, $dest);
@@ -289,15 +399,6 @@ class File
 	}
 
 	/**
-	 * Returns some stats about the file (similar to stat($this->path))
-	 * @return array
-	 */
-	public function getStats()
-	{
-		return ($this->exists() ? \stat($this->path) : null);
-	}
-
-	/**
 	 * Returns data on the owner of the file
 	 * @return array
 	 */
@@ -306,14 +407,5 @@ class File
 		if (!$this->exists())
 			return null;
 		return (\function_exists('posix_getpwuid') ? \posix_getpwuid(\fileowner($this->path)) : null);
-	}
-
-	/**
-	 * Returns the permissions on the file (similar to \fileperms($this->path))
-	 * @return int
-	 */
-	public function getPerms()
-	{
-		return ($this->exists() ? \fileperms($this->path) : null);
 	}
 }
