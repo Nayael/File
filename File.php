@@ -5,7 +5,7 @@
  * by Nicolas Vannier
  * http://www.nicolas-vannier.com
  * 
- * Date: Fri Dec 28 2012 03:47:30 GMT+0200
+ * Date: Sat Dec 29 2012 18:12:55 GMT+0200
  */
 namespace Nayael\Util;
 
@@ -19,35 +19,9 @@ class File
 	 */
 	private $path = '';
 
-	/**
-	 * The permissions on the file (similar to \fileperms($this->path))
-	 *
-	 * @var int
-	 * @readonly
-	 */
-	private $perms = null;
-
-	/**
-	 * Datas on the owner of the file
-	 *
-	 * @var array
-	 * @readonly
-	 */
-	private $owner = null;
-
 	public function __get($value='')
 	{
 		switch ($value) {
-			case 'owner':
-				if (!$this->exists())
-					return null;
-				return ($this->owner = \function_exists('posix_getpwuid') ? \posix_getpwuid(\fileowner($this->path)) : null);
-				break;
-
-			case 'perms':
-				return ($this->perms = $this->exists() ? \fileperms($this->path) : null);
-				break;
-
 			case 'path':
 				return $this->$value;
 				break;
@@ -59,7 +33,7 @@ class File
 
 	/**
 	 * Creates a File instance, to easily manipulate a file
-	 * @param string $path The path to the file
+	 * @param string	$path The path to the file
 	 */
 	public function __construct($path)
 	{
@@ -68,7 +42,7 @@ class File
 
 	/**
 	 * Returns all the lines in the file (without eol characters)
-	 * @param bool $read_EOL If true, the array elements also contain the newline characters
+	 * @param bool	$read_EOL If true, the array elements also contain the newline characters
 	 * @return array
 	 */
 	public function readLines($read_EOL=false)
@@ -126,7 +100,7 @@ class File
 
 	/**
 	 * Replaces the newline character in the file
-	 * @param string $EOL The newline character to use
+	 * @param string	$EOL The newline character to use
 	 */
 	public function replaceEOL($EOL)
 	{
@@ -144,11 +118,11 @@ class File
 
 	/**
 	 * Writes data (overwrites by default)
-	 * @param string $data The string that is to be written.
-	 * @param bool $overwrite If true, the file will be erased before writing.
-	 * @param int $length If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.
+	 * @param string	$data The string that is to be written.
+	 * @param bool		$overwrite If true, the file will be erased before writing.
+	 * @param int		$length If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.
 	 */
-	public function write($data, $overwrite=true, int $length=null)
+	public function write($data, $overwrite=true, $length=null)
 	{
 		$resource = \fopen($this->path, $overwrite ? 'w' : 'a');
 		if (null===$length)
@@ -160,11 +134,11 @@ class File
 
 	/**
 	 * Writes a carrage return, then the given data (overwrites by default)
-	 * @param string $data The string that is to be written.
-	 * @param bool $overwrite If true, the file will be erased before writing.
-	 * @param int $length If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.
+	 * @param string	$data The string that is to be written.
+	 * @param bool		$overwrite If true, the file will be erased before writing.
+	 * @param int		$length If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.
 	 */
-	public function writeLine($data, $overwrite=true, int $length=null)
+	public function writeLine($data, $overwrite=true, $length=null)
 	{
 		$resource = \fopen($this->path, $overwrite ? 'w' : 'a');
 		if (null===$length)
@@ -176,20 +150,20 @@ class File
 
 	/**
 	 * Takes an array as a parameter, and writes each element in a line (overwrites by default)
-	 * @param array $lines The lines to write in the file
-	 * @param bool $overwrite If true, the file will be erased before writing.
-	 * @param bool $newline Shall a newline be added before writing in the file ?
+	 * @param array	$lines The lines to write in the file
+	 * @param bool	$overwrite If true, the file will be erased before writing.
+	 * @param bool	$newline Shall a newline be added before writing in the file ?
+	 * @param int 	$length If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.
 	 */
-	public function writeLines(array $lines, $overwrite=true, $newline=true)
+	public function writeLines(array $lines, $overwrite=true, $newline=true, $length=null)
 	{
 		foreach ($lines as $index => $line) {
-			var_dump($line);
 			if (!$newline && $index == 0)
-				$this->write($line, $overwrite);
+				$this->write($line, $overwrite, $length);
 			elseif ($index == 0)
-				$this->writeLine($line, $overwrite);
+				$this->writeLine($line, $overwrite, $length);
 			else
-				$this->appendLine($line);
+				$this->appendLine($line, $length);
 		}
 	}
 
@@ -197,7 +171,7 @@ class File
 	 * Writes data at the end of the file
 	 * Alias for write($data, false)
 	 */
-	public function append($data, int $length=null)
+	public function append($data, $length=null)
 	{
 		$this->write($data, false, $length);
 	}
@@ -206,7 +180,7 @@ class File
 	 * Writes a carrage return at the end of the file, then the given data
 	 * Alias for writeLine($data, false)
 	 */
-	public function appendLine($data='', int $length=null)
+	public function appendLine($data='', $length=null)
 	{
 		$this->writeLine($data, false, $length);
 	}
@@ -215,18 +189,18 @@ class File
 	 * Takes an array as a parameter, and writes each element in a line
 	 * Alias for writeLines($data, false)
 	 */
-	public function appendLines(array $lines, $newline=true)
+	public function appendLines(array $lines, $newline=true, $length=null)
 	{
-		$this->writeLines($lines, false, $length);
+		$this->writeLines($lines, false, $newline);
 	}
 
 	/**
 	 * Sets access and modification time of file, creates it if it doesn't exists
-	 * @param int $time The touch time. If time is not supplied, the current system time is used.
-	 * @param int $atime If present, the access time of the given filename is set to the value of atime. Otherwise, it is set to the value passed to the time parameter. If neither are present, the current system time is used.
+	 * @param int	$time The touch time. If time is not supplied, the current system time is used.
+	 * @param int	$atime If present, the access time of the given filename is set to the value of atime. Otherwise, it is set to the value passed to the time parameter. If neither are present, the current system time is used.
 	 * @return bool
 	 */
-	public function touch(int $time=null, int $atime=null)
+	public function touch($time=null, $atime=null)
 	{
 		if (null===$time)
 			$time = \time();
@@ -237,7 +211,7 @@ class File
 
 	/**
 	 * Deletes the file
-	 * @param resource $context
+	 * @param resource	$context
 	 * @return bool
 	 */
 	public function unlink(resource $context=null)
@@ -262,8 +236,8 @@ class File
 
 	/**
 	 * Copies the file
-	 * @param string $dest The destination path. If dest is a URL, the copy operation may fail if the wrapper does not support overwriting of existing files.
-	 * @param resource $context A valid context resource created with stream_context_create().
+	 * @param string	$dest The destination path. If dest is a URL, the copy operation may fail if the wrapper does not support overwriting of existing files.
+	 * @param resource	$context A valid context resource created with stream_context_create().
 	 * @return bool
 	 */
 	public function copy($dest, resource $context=null)
@@ -284,17 +258,17 @@ class File
 
 	/**
 	 * Executes chmod on the file
-	 * @param int $mode The mode parameter consists of three octal number components specifying access restrictions for the owner, the user group in which the owner is in, and to everybody else in this order.
+	 * @param int	$mode The mode parameter consists of three octal number components specifying access restrictions for the owner, the user group in which the owner is in, and to everybody else in this order.
 	 * @return bool
 	 */
-	public function chmod(int $mode)
+	public function chmod($mode)
 	{
 		return \chmod($this->path, $mode);
 	}
 
 	/**
 	 * Executes chown on the file
-	 * @param mixed $user A user name or number.
+	 * @param mixed	$user A user name or number.
 	 * @return bool
 	 */
 	public function chown($user)
@@ -321,5 +295,25 @@ class File
 	public function getStats()
 	{
 		return ($this->exists() ? \stat($this->path) : null);
+	}
+
+	/**
+	 * Returns data on the owner of the file
+	 * @return array
+	 */
+	public function getOwner()
+	{
+		if (!$this->exists())
+			return null;
+		return (\function_exists('posix_getpwuid') ? \posix_getpwuid(\fileowner($this->path)) : null);
+	}
+
+	/**
+	 * Returns the permissions on the file (similar to \fileperms($this->path))
+	 * @return int
+	 */
+	public function getPerms()
+	{
+		return ($this->exists() ? \fileperms($this->path) : null);
 	}
 }
