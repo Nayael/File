@@ -10,15 +10,7 @@
 namespace Nayael\Util;
 
 class File
-{
-	/**
-	 * Whether the file exists or not (similar to \file_exists())
-	 * 
-	 * @var bool
-	 * @readonly
-	 */
-	private $exists = false;
-	
+{	
 	/**
  	 * The path to the file
 	 *
@@ -26,14 +18,6 @@ class File
 	 * @readonly
 	 */
 	private $path = '';
-
-	/**
-	 * Some stats about the file (similar to stat($this->path))
-	 *
-	 * @var array
-	 * @readonly
-	 */
-	private $stat = array();
 
 	/**
 	 * The permissions on the file (similar to \fileperms($this->path))
@@ -44,29 +28,27 @@ class File
 	private $perms = null;
 
 	/**
-	 * The id of owner of the file (similar to fileowner($this->path))
+	 * Datas on the owner of the file
 	 *
-	 * @var string
+	 * @var array
 	 * @readonly
 	 */
-	private $owner = '';
-
-	/**
-	 * The name of owner of the file
-	 *
-	 * @var string
-	 * @readonly
-	 */
-	private $ownerName = '';
+	private $owner = null;
 
 	public function __get($value='')
 	{
 		switch ($value) {
-			case 'exists':
-				return \file_exists($this->path);
+			case 'owner':
+				if (!$this->exists())
+					return null;
+				return ($this->owner = \function_exists('posix_getpwuid') ? \posix_getpwuid(\fileowner($this->path)) : null);
 				break;
 
-			case 'stat': case 'perms': case 'path': case 'owner': case 'ownerName':
+			case 'perms':
+				return ($this->perms = $this->exists() ? \fileperms($this->path) : null);
+				break;
+
+			case 'path':
 				return $this->$value;
 				break;
 			
@@ -82,24 +64,93 @@ class File
 	public function __construct($path)
 	{
 		$this->path = $path;
-		$this->exists = \file_exists($this->path);
-		if ($this->exists) {	// If the file exists, we set the necessary properties
-			$this->owner = \fileowner($this->path);
-			if (\function_exists('posix_getpwuid'))
-				$this->ownerName = \posix_getpwuid($this->owner);
-			$this->perms = \fileperms($this->path);
-			$this->stat = \stat($this->path);
+	}
+
+	/**
+	 * Returns all the lines in the file (without eol characters)
+	 * @param bool If true, the array elements also contain the new line characters
+	 * @return array
+	 */
+	public function getLines($newline=false)
+	{
+		$lines = \file($this->path);
+		if ($this->getEOL()=="\r" && count($lines)==1) {
+			$lines = \explode("\r", $lines[0]);
+			if ($newline) {
+				foreach ($lines as $index => &$line) {
+					if ($index==count($lines) - 1) {
+						if ($line==="")
+							array_pop($lines);
+						break;
+					}
+					$line .= "\r";
+				}
+			}
+		}
+		if (!$newline) {
+			foreach ($lines as &$line) {
+				$line = \preg_replace('/\\r|\\n/', '', $line);
+			}
+		}
+		return $lines;
+	}
+
+	/**
+	 * Returns a line from the file by its position (starts at 0)
+	 * @return string
+	 */
+	public function getLine($index)
+	{
+		$lines = $this->getLines();
+		return $lines[$index];
+	}
+
+	/**
+	 * Returns the newline character used in the file
+	 * @return string
+	 */
+	public function getEOL()
+	{
+		$EOL = "";
+		$resource = \fopen($this->path, 'r');
+		$line = \fgets($resource);
+		if (false!==\strpos($line, "\r\n"))
+			$EOL = "\r\n";
+		elseif (false!==\strpos($line, "\r"))
+			$EOL = "\r";
+		else
+			$EOL = "\n";
+		\fclose($resource);
+		return $EOL;
+	}
+
+	/**
+	 * Replaces the newline character in the file
+	 * @param string $EOL The newline character to use
+	 */
+	public function replaceEOL($EOL)
+	{
+		if (!$this->exists() || $EOL == $this->getEOL() || !in_array($EOL, array("\r", "\n", "\r\n")))
+			return;
+		$lines = $this->getLines(true);
+		$this->write('');
+		foreach ($lines as $index => $line) {
+			if (($line = \preg_replace('/\\r|\\n/', '', $line)) == $lines[$index])
+				$this->append($line);
+			else
+				$this->append($line.$EOL);
 		}
 	}
 
 	/**
-	 * Writes data at the end of the file
+	 * Writes data (overwrites by default)
 	 * @param string $data The string that is to be written.
+	 * @param bool $overwrite If true, the file will be erased before writing.
 	 * @param int $length If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.
 	 */
-	public function write($data, int $length=null)
+	public function write($data, $overwrite=true, int $length=null)
 	{
-		$resource = \fopen($this->path, 'a');
+		$resource = \fopen($this->path, $overwrite ? 'w' : 'a');
 		if (null===$length)
 			\fwrite($resource, $data);
 		else
@@ -108,13 +159,14 @@ class File
 	}
 
 	/**
-	 * Writes a carrage return at the end of the file, then the given data
+	 * Writes a carrage return, then the given data (overwrites by default)
 	 * @param string $data The string that is to be written.
+	 * @param bool $overwrite If true, the file will be erased before writing.
 	 * @param int $length If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.
 	 */
-	public function writeLine($data='', int $length=null)
+	public function writeLine($data, $overwrite=true, int $length=null)
 	{
-		$resource = \fopen($this->path, 'a');
+		$resource = \fopen($this->path, $overwrite ? 'w' : 'a');
 		if (null===$length)
 			\fwrite($resource, PHP_EOL.$data);
 		else
@@ -123,19 +175,49 @@ class File
 	}
 
 	/**
-	 * Takes an array as a parameter, and writes each element in a line
+	 * Takes an array as a parameter, and writes each element in a line (overwrites by default)
 	 * @param array $lines The lines to write in the file
+	 * @param bool $overwrite If true, the file will be erased before writing.
 	 * @param bool $newline Shall a newline be added before writing in the file ?
 	 */
-	public function writeLines($lines=array(), $newline=true)
+	public function writeLines(array $lines, $overwrite=true, $newline=true)
 	{
 		foreach ($lines as $index => $line) {
-			if (!$newline && $index == 0) {
-				$this->write($line);
-				continue;
-			}
-			$this->writeLine($line);
+			var_dump($line);
+			if (!$newline && $index == 0)
+				$this->write($line, $overwrite);
+			elseif ($index == 0)
+				$this->writeLine($line, $overwrite);
+			else
+				$this->appendLine($line);
 		}
+	}
+
+	/**
+	 * Writes data at the end of the file
+	 * Alias for write($data, false)
+	 */
+	public function append($data, int $length=null)
+	{
+		$this->write($data, false, $length);
+	}
+
+	/**
+	 * Writes a carrage return at the end of the file, then the given data
+	 * Alias for writeLine($data, false)
+	 */
+	public function appendLine($data='', int $length=null)
+	{
+		$this->writeLine($data, false, $length);
+	}
+
+	/**
+	 * Takes an array as a parameter, and writes each element in a line
+	 * Alias for writeLines($data, false)
+	 */
+	public function appendLines(array $lines, $newline=true)
+	{
+		$this->writeLines($lines, false, $length);
 	}
 
 	/**
@@ -192,6 +274,15 @@ class File
 	}
 
 	/**
+	 * Returns the path to the file's directory
+	 * @return string
+	 */
+	public function dirname()
+	{
+		return \dirname($this->path);
+	}
+
+	/**
 	 * Executes chmod on the file
 	 * @param int $mode The mode parameter consists of three octal number components specifying access restrictions for the owner, the user group in which the owner is in, and to everybody else in this order.
 	 * @return bool
@@ -209,5 +300,26 @@ class File
 	public function chown($user)
 	{
 		return \chown($this->path, $user);
+	}
+
+	////////////
+	// GETTERS
+	//
+	/**
+	 * Whether the file exists or not
+	 * @return bool
+	 */
+	public function exists()
+	{
+		return \file_exists($this->path);
+	}
+
+	/**
+	 * Returns some stats about the file (similar to stat($this->path))
+	 * @return array
+	 */
+	public function getStats()
+	{
+		return ($this->exists() ? \stat($this->path) : null);
 	}
 }
