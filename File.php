@@ -68,15 +68,15 @@ class File
 
 	/**
 	 * Returns all the lines in the file (without eol characters)
-	 * @param bool If true, the array elements also contain the new line characters
+	 * @param bool $read_EOL If true, the array elements also contain the newline characters
 	 * @return array
 	 */
-	public function getLines($newline=false)
+	public function readLines($read_EOL=false)
 	{
 		$lines = \file($this->path);
 		if ($this->getEOL()=="\r" && count($lines)==1) {
 			$lines = \explode("\r", $lines[0]);
-			if ($newline) {
+			if ($read_EOL) {
 				foreach ($lines as $index => &$line) {
 					if ($index==count($lines) - 1) {
 						if ($line==="")
@@ -87,7 +87,7 @@ class File
 				}
 			}
 		}
-		if (!$newline) {
+		if (!$read_EOL) {
 			foreach ($lines as &$line) {
 				$line = \preg_replace('/\\r|\\n/', '', $line);
 			}
@@ -99,9 +99,9 @@ class File
 	 * Returns a line from the file by its position (starts at 0)
 	 * @return string
 	 */
-	public function getLine($index)
+	public function readLine($index)
 	{
-		$lines = $this->getLines();
+		$lines = $this->readLines();
 		return $lines[$index];
 	}
 
@@ -132,7 +132,7 @@ class File
 	{
 		if (!$this->exists() || $EOL == $this->getEOL() || !in_array($EOL, array("\r", "\n", "\r\n")))
 			return;
-		$lines = $this->getLines(true);
+		$lines = $this->readLines(true);
 		$this->write('');
 		foreach ($lines as $index => $line) {
 			if (($line = \preg_replace('/\\r|\\n/', '', $line)) == $lines[$index])
