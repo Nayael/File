@@ -1,0 +1,602 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project version="2.0.0a12" title="">
+  <file path="File.php" hash="b86de7911cc9ba3298e61db6fa80da6a" package="Default">
+    <docblock line="2">
+      <description>A File library to easily manipulate files in PHP</description>
+      <long-description>&lt;p&gt;by Nicolas Vannier
+http://www.nicolas-vannier.com&lt;/p&gt;
+
+&lt;p&gt;Date: Sat Dec 29 2012 18:12:55 GMT+0200&lt;/p&gt;</long-description>
+    </docblock>
+    <class final="false" abstract="false" namespace="Nayael\File" line="17" package="Default">
+      <extends>\Exception</extends>
+      <name>FileException</name>
+      <full_name>\Nayael\File\FileException</full_name>
+      <docblock line="12">
+        <description>Thrown when File returns an execption</description>
+        <long-description></long-description>
+        <tag line="12" name="author" description="Nicolas Vannier"/>
+      </docblock>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="24" package="Default">
+        <name>__construct</name>
+        <full_name>__construct</full_name>
+        <docblock line="18">
+          <description>Throws a FileException</description>
+          <long-description></long-description>
+          <tag line="18" name="param" description="The path to the file that generated an Exception" type="string" variable="$path">
+            <type by_reference="false">string</type>
+          </tag>
+          <tag line="18" name="param" description="The exception code" type="int" variable="$code">
+            <type by_reference="false">int</type>
+          </tag>
+          <tag line="18" name="param" description="The previous exception used for the exception chaining." type="\Exception" variable="$previous">
+            <type by_reference="false">\Exception</type>
+          </tag>
+        </docblock>
+        <argument line="24">
+          <name>$path</name>
+          <default></default>
+          <type/>
+        </argument>
+        <argument line="24">
+          <name>$code</name>
+          <default>0</default>
+          <type/>
+        </argument>
+        <argument line="24">
+          <name>$previous</name>
+          <default>null</default>
+          <type>\Exception</type>
+        </argument>
+      </method>
+    </class>
+    <class final="false" abstract="false" namespace="Nayael\File" line="51" package="Default">
+      <extends/>
+      <name>File</name>
+      <full_name>\Nayael\File\File</full_name>
+      <docblock line="45">
+        <description>Represents the file to manipulate.</description>
+        <long-description>&lt;p&gt;Provides useful methods to easily handle file writing, reading, etc.&lt;/p&gt;</long-description>
+        <tag line="45" name="author" description="Nicolas Vannier"/>
+      </docblock>
+      <property final="false" static="false" visibility="private" line="57" namespace="Nayael\File" package="Default">
+        <name>$path</name>
+        <default>''</default>
+        <docblock line="53">
+          <description>[READONLY] The path to the file</description>
+          <long-description></long-description>
+          <tag line="53" name="var" description="" type="string">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+      </property>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="63" package="Default">
+        <name>__get</name>
+        <full_name>__get</full_name>
+        <docblock line="59">
+          <description>Magic getter method</description>
+          <long-description></long-description>
+          <tag line="59" name="param" description="The property to return" type="string" variable="$property">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+        <argument line="63">
+          <name>$property</name>
+          <default>''</default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="79" package="Default">
+        <name>__construct</name>
+        <full_name>__construct</full_name>
+        <docblock line="75">
+          <description>Creates a File instance, to manipulate a file</description>
+          <long-description></long-description>
+          <tag line="75" name="param" description="The path to the file" type="string" variable="$path">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+        <argument line="79">
+          <name>$path</name>
+          <default></default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="private" namespace="Nayael\File" line="91" package="Default">
+        <name>checkExistence</name>
+        <full_name>checkExistence</full_name>
+        <docblock line="87">
+          <description>Checks if the file exists.</description>
+          <long-description>&lt;p&gt;Throws an error if not.&lt;/p&gt;</long-description>
+        </docblock>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="private" namespace="Nayael\File" line="101" package="Default">
+        <name>checkReadable</name>
+        <full_name>checkReadable</full_name>
+        <docblock line="97">
+          <description>Checks if the file is readable.</description>
+          <long-description>&lt;p&gt;Throws an error if not.&lt;/p&gt;</long-description>
+        </docblock>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="private" namespace="Nayael\File" line="111" package="Default">
+        <name>checkWritable</name>
+        <full_name>checkWritable</full_name>
+        <docblock line="107">
+          <description>Checks if the file is writable.</description>
+          <long-description>&lt;p&gt;Throws an error if not.&lt;/p&gt;</long-description>
+        </docblock>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="126" package="Default">
+        <name>read</name>
+        <full_name>read</full_name>
+        <docblock line="118">
+          <description>Reads the file and returns its content as a string</description>
+          <long-description></long-description>
+          <tag line="118" name="param" description="The FILE_USE_INCLUDE_PATH can be used to trigger include path search." type="bool" variable="$use_include_path">
+            <type by_reference="false">bool</type>
+          </tag>
+          <tag line="118" name="param" description="A valid context resource created with stream_context_create(). If you don't need to use a custom context, you can skip this parameter by NULL." type="\resource" variable="$context">
+            <type by_reference="false">\resource</type>
+          </tag>
+          <tag line="118" name="param" description="The offset where the reading starts on the original stream. Seeking (offset) is not supported with remote files. Attempting to seek on non-local files may work with small offsets, but this is unpredictable because it works on the buffered stream." type="int" variable="$offset">
+            <type by_reference="false">int</type>
+          </tag>
+          <tag line="118" name="param" description="Maximum length of data read." type="int" variable="$maxlen">
+            <type by_reference="false">int</type>
+          </tag>
+          <tag line="118" name="return" description="The file content" type="string">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+        <argument line="126">
+          <name>$use_include_path</name>
+          <default>false</default>
+          <type/>
+        </argument>
+        <argument line="126">
+          <name>$context</name>
+          <default>null</default>
+          <type>\resource</type>
+        </argument>
+        <argument line="126">
+          <name>$offset</name>
+          <default>-1</default>
+          <type/>
+        </argument>
+        <argument line="126">
+          <name>$maxlen</name>
+          <default>-1</default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="139" package="Default">
+        <name>readLines</name>
+        <full_name>readLines</full_name>
+        <docblock line="134">
+          <description>Returns all the lines in the file (without eol characters)</description>
+          <long-description></long-description>
+          <tag line="134" name="param" description="If true, the array elements also contain the newline characters" type="bool" variable="$read_EOL">
+            <type by_reference="false">bool</type>
+          </tag>
+          <tag line="134" name="return" description="" type="array">
+            <type by_reference="false">array</type>
+          </tag>
+        </docblock>
+        <argument line="139">
+          <name>$read_EOL</name>
+          <default>false</default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="169" package="Default">
+        <name>readLine</name>
+        <full_name>readLine</full_name>
+        <docblock line="164">
+          <description>Returns a line from the file by its position (starts at 0)</description>
+          <long-description></long-description>
+          <tag line="164" name="param" description="The line to be read" type="int" variable="$index">
+            <type by_reference="false">int</type>
+          </tag>
+          <tag line="164" name="return" description="" type="string">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+        <argument line="169">
+          <name>$index</name>
+          <default></default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="179" package="Default">
+        <name>getEOL</name>
+        <full_name>getEOL</full_name>
+        <docblock line="175">
+          <description>Returns the newline character used in the file</description>
+          <long-description></long-description>
+          <tag line="175" name="return" description="" type="string">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="199" package="Default">
+        <name>replaceEOL</name>
+        <full_name>replaceEOL</full_name>
+        <docblock line="195">
+          <description>Replaces the newline character in the file</description>
+          <long-description></long-description>
+          <tag line="195" name="param" description="The newline character to use" type="string" variable="$EOL">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+        <argument line="199">
+          <name>$EOL</name>
+          <default></default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="219" package="Default">
+        <name>write</name>
+        <full_name>write</full_name>
+        <docblock line="213">
+          <description>Writes data (overwrites by default)</description>
+          <long-description></long-description>
+          <tag line="213" name="param" description="The string that is to be written." type="string" variable="$data">
+            <type by_reference="false">string</type>
+          </tag>
+          <tag line="213" name="param" description="If true, the file will be erased before writing." type="bool" variable="$overwrite">
+            <type by_reference="false">bool</type>
+          </tag>
+          <tag line="213" name="param" description="If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first." type="int" variable="$length">
+            <type by_reference="false">int</type>
+          </tag>
+        </docblock>
+        <argument line="219">
+          <name>$data</name>
+          <default></default>
+          <type/>
+        </argument>
+        <argument line="219">
+          <name>$overwrite</name>
+          <default>true</default>
+          <type/>
+        </argument>
+        <argument line="219">
+          <name>$length</name>
+          <default>null</default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="236" package="Default">
+        <name>writeLine</name>
+        <full_name>writeLine</full_name>
+        <docblock line="230">
+          <description>Writes a new line, then the given data (overwrites by default)</description>
+          <long-description></long-description>
+          <tag line="230" name="param" description="The string that is to be written." type="string" variable="$data">
+            <type by_reference="false">string</type>
+          </tag>
+          <tag line="230" name="param" description="If true, the file will be erased before writing." type="bool" variable="$overwrite">
+            <type by_reference="false">bool</type>
+          </tag>
+          <tag line="230" name="param" description="If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first." type="int" variable="$length">
+            <type by_reference="false">int</type>
+          </tag>
+        </docblock>
+        <argument line="236">
+          <name>$data</name>
+          <default></default>
+          <type/>
+        </argument>
+        <argument line="236">
+          <name>$overwrite</name>
+          <default>true</default>
+          <type/>
+        </argument>
+        <argument line="236">
+          <name>$length</name>
+          <default>null</default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="254" package="Default">
+        <name>writeLines</name>
+        <full_name>writeLines</full_name>
+        <docblock line="247">
+          <description>Takes an array as a parameter, and writes each element in a line (overwrites by default)</description>
+          <long-description></long-description>
+          <tag line="247" name="param" description="The lines to write in the file" type="array" variable="$lines">
+            <type by_reference="false">array</type>
+          </tag>
+          <tag line="247" name="param" description="If true, the file will be erased before writing." type="bool" variable="$overwrite">
+            <type by_reference="false">bool</type>
+          </tag>
+          <tag line="247" name="param" description="Shall a newline be added before writing in the file ?" type="bool" variable="$newline">
+            <type by_reference="false">bool</type>
+          </tag>
+          <tag line="247" name="param" description="If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first." type="int" variable="$length">
+            <type by_reference="false">int</type>
+          </tag>
+        </docblock>
+        <argument line="254">
+          <name>$lines</name>
+          <default></default>
+          <type>array</type>
+        </argument>
+        <argument line="254">
+          <name>$overwrite</name>
+          <default>true</default>
+          <type/>
+        </argument>
+        <argument line="254">
+          <name>$newline</name>
+          <default>true</default>
+          <type/>
+        </argument>
+        <argument line="254">
+          <name>$length</name>
+          <default>null</default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="272" package="Default">
+        <name>append</name>
+        <full_name>append</full_name>
+        <docblock line="266">
+          <description>Writes data at the end of the file</description>
+          <long-description></long-description>
+          <tag line="266" name="param" description="The string that is to be written." type="string" variable="$data">
+            <type by_reference="false">string</type>
+          </tag>
+          <tag line="266" name="param" description="If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first." type="int" variable="$length">
+            <type by_reference="false">int</type>
+          </tag>
+          <tag line="266" name="see" description="\Nayael\File\File::write()" refers="\Nayael\File\File::write()"/>
+        </docblock>
+        <argument line="272">
+          <name>$data</name>
+          <default></default>
+          <type/>
+        </argument>
+        <argument line="272">
+          <name>$length</name>
+          <default>null</default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="282" package="Default">
+        <name>appendLine</name>
+        <full_name>appendLine</full_name>
+        <docblock line="276">
+          <description>Writes a new line at the end of the file, then the given data</description>
+          <long-description></long-description>
+          <tag line="276" name="param" description="The string that is to be written." type="string" variable="$data">
+            <type by_reference="false">string</type>
+          </tag>
+          <tag line="276" name="param" description="If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first." type="int" variable="$length">
+            <type by_reference="false">int</type>
+          </tag>
+          <tag line="276" name="see" description="\Nayael\File\File::writeLine()" refers="\Nayael\File\File::writeLine()"/>
+        </docblock>
+        <argument line="282">
+          <name>$data</name>
+          <default>''</default>
+          <type/>
+        </argument>
+        <argument line="282">
+          <name>$length</name>
+          <default>null</default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="294" package="Default">
+        <name>appendLines</name>
+        <full_name>appendLines</full_name>
+        <docblock line="287">
+          <description>Takes an array as a parameter, and writes each element in a line</description>
+          <long-description></long-description>
+          <tag line="287" name="param" description="The lines to write in the file" type="array" variable="$lines">
+            <type by_reference="false">array</type>
+          </tag>
+          <tag line="287" name="param" description="Shall a newline be added before writing in the file ?" type="bool" variable="$newline">
+            <type by_reference="false">bool</type>
+          </tag>
+          <tag line="287" name="param" description="If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first." type="int" variable="$length">
+            <type by_reference="false">int</type>
+          </tag>
+          <tag line="287" name="see" description="\Nayael\File\File::writeLines()" refers="\Nayael\File\File::writeLines()"/>
+        </docblock>
+        <argument line="294">
+          <name>$lines</name>
+          <default></default>
+          <type>array</type>
+        </argument>
+        <argument line="294">
+          <name>$newline</name>
+          <default>true</default>
+          <type/>
+        </argument>
+        <argument line="294">
+          <name>$length</name>
+          <default>null</default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="305" package="Default">
+        <name>touch</name>
+        <full_name>touch</full_name>
+        <docblock line="299">
+          <description>Sets access and modification time of file, creates it if it doesn't exists</description>
+          <long-description></long-description>
+          <tag line="299" name="param" description="The touch time. If time is not supplied, the current system time is used." type="int" variable="$time">
+            <type by_reference="false">int</type>
+          </tag>
+          <tag line="299" name="param" description="If present, the access time of the given filename is set to the value of atime. Otherwise, it is set to the value passed to the time parameter. If neither are present, the current system time is used." type="int" variable="$atime">
+            <type by_reference="false">int</type>
+          </tag>
+          <tag line="299" name="return" description="" type="bool">
+            <type by_reference="false">bool</type>
+          </tag>
+        </docblock>
+        <argument line="305">
+          <name>$time</name>
+          <default>null</default>
+          <type/>
+        </argument>
+        <argument line="305">
+          <name>$atime</name>
+          <default>null</default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="317" package="Default">
+        <name>create</name>
+        <full_name>create</full_name>
+        <docblock line="314">
+          <description>Creates the file if it doesn't exist</description>
+          <long-description></long-description>
+        </docblock>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="329" package="Default">
+        <name>unlink</name>
+        <full_name>unlink</full_name>
+        <docblock line="324">
+          <description>Deletes the file name</description>
+          <long-description></long-description>
+          <tag line="324" name="param" description="" type="\resource" variable="$context">
+            <type by_reference="false">\resource</type>
+          </tag>
+          <tag line="324" name="return" description="" type="bool">
+            <type by_reference="false">bool</type>
+          </tag>
+        </docblock>
+        <argument line="329">
+          <name>$context</name>
+          <default>null</default>
+          <type>\resource</type>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="342" package="Default">
+        <name>delete</name>
+        <full_name>delete</full_name>
+        <docblock line="337">
+          <description>Deletes the file name</description>
+          <long-description></long-description>
+          <tag line="337" name="param" description="" type="\resource" variable="$context">
+            <type by_reference="false">\resource</type>
+          </tag>
+          <tag line="337" name="see" description="\Nayael\File\File::unlink()" refers="\Nayael\File\File::unlink()"/>
+        </docblock>
+        <argument line="342">
+          <name>$context</name>
+          <default>null</default>
+          <type>\resource</type>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="353" package="Default">
+        <name>copy</name>
+        <full_name>copy</full_name>
+        <docblock line="347">
+          <description>Copies the file</description>
+          <long-description></long-description>
+          <tag line="347" name="param" description="The destination path. If dest is a URL, the copy operation may fail if the wrapper does not support overwriting of existing files." type="string" variable="$dest">
+            <type by_reference="false">string</type>
+          </tag>
+          <tag line="347" name="param" description="A valid context resource created with stream_context_create()." type="\resource" variable="$context">
+            <type by_reference="false">\resource</type>
+          </tag>
+          <tag line="347" name="return" description="" type="bool">
+            <type by_reference="false">bool</type>
+          </tag>
+        </docblock>
+        <argument line="353">
+          <name>$dest</name>
+          <default></default>
+          <type/>
+        </argument>
+        <argument line="353">
+          <name>$context</name>
+          <default>null</default>
+          <type>\resource</type>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="364" package="Default">
+        <name>dirname</name>
+        <full_name>dirname</full_name>
+        <docblock line="360">
+          <description>Returns the path to the file's directory</description>
+          <long-description></long-description>
+          <tag line="360" name="return" description="" type="string">
+            <type by_reference="false">string</type>
+          </tag>
+        </docblock>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="374" package="Default">
+        <name>chmod</name>
+        <full_name>chmod</full_name>
+        <docblock line="369">
+          <description>Executes chmod on the file</description>
+          <long-description></long-description>
+          <tag line="369" name="param" description="The mode parameter consists of three octal number components specifying access restrictions for the owner, the user group in which the owner is in, and to everybody else in this order." type="int" variable="$mode">
+            <type by_reference="false">int</type>
+          </tag>
+          <tag line="369" name="return" description="" type="bool">
+            <type by_reference="false">bool</type>
+          </tag>
+        </docblock>
+        <argument line="374">
+          <name>$mode</name>
+          <default></default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="384" package="Default">
+        <name>chown</name>
+        <full_name>chown</full_name>
+        <docblock line="379">
+          <description>Executes chown on the file</description>
+          <long-description></long-description>
+          <tag line="379" name="param" description="A user name or number." type="mixed" variable="$user">
+            <type by_reference="false">mixed</type>
+          </tag>
+          <tag line="379" name="return" description="" type="bool">
+            <type by_reference="false">bool</type>
+          </tag>
+        </docblock>
+        <argument line="384">
+          <name>$user</name>
+          <default></default>
+          <type/>
+        </argument>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="396" package="Default">
+        <name>exists</name>
+        <full_name>exists</full_name>
+        <docblock line="392">
+          <description>Whether the file exists or not</description>
+          <long-description></long-description>
+          <tag line="392" name="return" description="" type="bool">
+            <type by_reference="false">bool</type>
+          </tag>
+        </docblock>
+      </method>
+      <method final="false" abstract="false" static="false" visibility="public" namespace="Nayael\File" line="405" package="Default">
+        <name>getOwner</name>
+        <full_name>getOwner</full_name>
+        <docblock line="401">
+          <description>Returns data on the owner of the file</description>
+          <long-description></long-description>
+          <tag line="401" name="return" description="" type="array">
+            <type by_reference="false">array</type>
+          </tag>
+        </docblock>
+      </method>
+    </class>
+  </file>
+  <package name="Default" full_name="Default"/>
+  <namespace name="Nayael" full_name="Nayael">
+    <namespace name="File" full_name="Nayael\File"/>
+  </namespace>
+  <marker count="0">todo</marker>
+  <marker count="0">fixme</marker>
+  <deprecated count="0"/>
+</project>

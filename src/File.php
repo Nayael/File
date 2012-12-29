@@ -228,7 +228,7 @@ class File
 	}
 
 	/**
-	 * Writes a carrage return, then the given data (overwrites by default)
+	 * Writes a new line, then the given data (overwrites by default)
 	 * @param string	$data The string that is to be written.
 	 * @param bool		$overwrite If true, the file will be erased before writing.
 	 * @param int		$length If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.
@@ -274,7 +274,7 @@ class File
 		$this->write($data, false, $length);
 	}
 	/**
-	 * Writes a carrage return at the end of the file, then the given data
+	 * Writes a new line at the end of the file, then the given data
 	 * @param string	$data The string that is to be written.
 	 * @param int		$length If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.
 	 * @see File::writeLine()
